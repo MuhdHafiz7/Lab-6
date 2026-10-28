@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Display Books</title>
+</head>
+<body>
+    <h1>Book List</h1>
+    <div id="book-list"></div>
+
+    <script>
+        const jsonUrl = "https://github.com/MuhdHafiz7/Lab-6/main/books.json";
+
+        async function displayBooks() {
+            const status = document.getElementById("status");
+            const bookList = document.getElementById("book-list");
+
+            try {
+                const response = await fetch(jsonUrl);
+
+                if (!response.ok) {
+                    throw new Error(`HTTP error: ${response.status}`);
+                }
+
+                const data = await response.json();
+
+                if (!Array.isArray(data.Books)) {
+                    throw new TypeError('The JSON data must contain a "Books" array.');
+                }
+
+                status.textContent = "";
+
+                data.Books.forEach((book) => {
+                    const article = document.createElement("article");
+                    article.className = "book";
+
+                    const title = document.createElement("h2");
+                    title.textContent = book.title ?? "Untitled";
+
+                    const author = document.createElement("p");
+                    author.textContent = `Author: ${book.author ?? "Unknown"}`;
+
+                    const year = document.createElement("p");
+                    year.textContent = `Publication Year: ${book.publication_year ?? "Unknown"}`;
+
+                    const genres = document.createElement("p");
+                    genres.textContent = `Genres: ${
+                        Array.isArray(book.genres) ? book.genres.join(", ") : "Not specified"
+                    }`;
+
+                    article.append(title, author, year, genres);
+                    bookList.appendChild(article);
+                });
+
+                if (data.Books.length === 0) {
+                    status.textContent = "No books found.";
+                }
+            } catch (error) {
+                status.textContent = `Unable to load books: ${error.message}`;
+                status.className = "error";
+                console.error("Error fetching books:", error);
+            }
+        }
+
+        displayBooks();
+    </script>
+</body>
+</html>
