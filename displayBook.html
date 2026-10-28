@@ -7,21 +7,27 @@
 </head>
 <body>
     <h1>Book List</h1>
+    <label for="title-select">Search by book title:</label>
+    <select id="title-select">
+        <option value="">-- Select a title --</option>
+    </select>
+    <p id="status"></p>
     <div id="book-list"></div>
 
     <script>
-        const jsonUrl = "https://github.com/MuhdHafiz7/Lab-6/main/books.json";
+        const jsonUrl = "https://raw.githubusercontent.com/MuhdHafiz7/Lab-6/main/books.json";
 
         async function displayBooks() {
             const status = document.getElementById("status");
             const bookList = document.getElementById("book-list");
+            const titleSelect = document.getElementById("title-select");
 
             try {
                 const response = await fetch(jsonUrl);
 
                 if (!response.ok) {
                     throw new Error(`HTTP error: ${response.status}`);
-                }
+                }1
 
                 const data = await response.json();
 
@@ -29,9 +35,34 @@
                     throw new TypeError('The JSON data must contain a "Books" array.');
                 }
 
-                status.textContent = "";
+                const books = data.Books;
+                status.textContent = "Select a book title to view details.";
 
-                data.Books.forEach((book) => {
+                books.forEach((book) => {
+                    const option = document.createElement("option");
+                    option.value = book.title ?? "";
+                    option.textContent = book.title ?? "Untitled";
+                    titleSelect.appendChild(option);
+                });
+
+                titleSelect.addEventListener("change", () => {
+                    const selectedTitle = titleSelect.value;
+                    bookList.innerHTML = "";
+
+                    if (!selectedTitle) {
+                        status.textContent = "Select a book title to view details.";
+                        return;
+                    }
+
+                    const book = books.find((item) => item.title === selectedTitle);
+
+                    if (!book) {
+                        status.textContent = "No matching book found.";
+                        return;
+                    }
+
+                    status.textContent = "";
+
                     const article = document.createElement("article");
                     article.className = "book";
 
@@ -53,7 +84,7 @@
                     bookList.appendChild(article);
                 });
 
-                if (data.Books.length === 0) {
+                if (books.length === 0) {
                     status.textContent = "No books found.";
                 }
             } catch (error) {
@@ -62,7 +93,7 @@
                 console.error("Error fetching books:", error);
             }
         }
-
+        
         displayBooks();
     </script>
 </body>
